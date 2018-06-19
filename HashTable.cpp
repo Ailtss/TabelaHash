@@ -82,8 +82,44 @@ string HashTable::get(const string key)
  */
 bool HashTable::put(const string key, const string value)
 {
+    unsigned long index = hash(key);
+    HashEntry<string, string>* aux = new HashEntry<string, string>(key, value);
+   /* if(this->data[index] == nullptr)
+    {
+        this->data[index] = aux;
+        this->quantity++;
+        return true;
+    }
+    */
+
+        while(this->data[index] != nullptr && this->data[index] != ENTRY_DELETED && this->data[index]->getKey() != key)// Finish
+        {
+            index++;
+        }
+
+
+        if(index > this->getSize())
+        {
+            return false;
+        }
+
+        if(this->data[index] == nullptr)
+        {
+            this->data[index] = aux;
+            this->quantity++;
+        }
+
+        else
+        {
+            if(this->data[index]->getValue() != value)
+            {
+                this->data[index]->setValue(value);
+            }
+        }
+
     
-    throw "NOT YET IMPLEMENTED";
+
+    return true;
 }
 
 /**
