@@ -73,7 +73,25 @@ HashTable::~HashTable()
  */
 string HashTable::get(const string key)
 {
-    throw "NOT YET IMPLEMENTED";
+    auto base = this->hash(key);
+
+    for(auto d = 0; d < this->getSize(); ++d)
+    {
+        auto index = (base+d) % this->getSize();
+
+        auto entry = this->data[index];
+
+        if( entry == nullptr )
+        {
+            return "";
+        }
+        else if( entry != ENTRY_DELETED && key == entry->getKey() )
+        {
+            return entry->getValue();
+        }
+    }
+
+    return "";
 }
 
 /**
@@ -82,44 +100,45 @@ string HashTable::get(const string key)
  */
 bool HashTable::put(const string key, const string value)
 {
-    unsigned long index = hash(key);
-    HashEntry<string, string>* aux = new HashEntry<string, string>(key, value);
-   /* if(this->data[index] == nullptr)
+    auto base = this->hash(key);
+
+    int toInsert = -1;
+    for(auto d = 0; d < this->getSize(); ++d)
     {
-        this->data[index] = aux;
-        this->quantity++;
+        auto index = (base+d) % this->getSize();
+
+        auto entry = this->data[index];
+
+        if( entry == nullptr )
+        {
+            if( toInsert == -1 )
+            {
+                toInsert = index;
+            }
+            break;
+        }
+        else if( entry == ENTRY_DELETED )
+        {
+            toInsert = index;
+        }
+        else if( key == entry->getKey() )
+        {
+            entry->setValue(value);
+            return true;
+        }
+    }
+
+    if( toInsert != -1 )
+    {
+        auto newEntry = new HashEntry<string, string>(key, value);
+        this->data[toInsert] = newEntry;
+        ++this->quantity;
         return true;
     }
-    */
-
-        while(this->data[index] != nullptr && this->data[index] != ENTRY_DELETED && this->data[index]->getKey() != key)// Finish
-        {
-            index++;
-        }
-
-
-        if(index > this->getSize())
-        {
-            return false;
-        }
-
-        if(this->data[index] == nullptr)
-        {
-            this->data[index] = aux;
-            this->quantity++;
-        }
-
-        else
-        {
-            if(this->data[index]->getValue() != value)
-            {
-                this->data[index]->setValue(value);
-            }
-        }
-
-    
-
-    return true;
+    else
+    {
+        return false;
+    }
 }
 
 /**
@@ -128,7 +147,28 @@ bool HashTable::put(const string key, const string value)
  */
 bool HashTable::remove(const string key)
 {
-    throw "NOT YET IMPLEMENTED";
+    auto base = this->hash(key);
+
+    for(auto d = 0; d < this->getSize(); ++d)
+    {
+        auto index = (base+d) % this->getSize();
+
+        auto entry = this->data[index];
+
+        if( entry == nullptr )
+        {
+            return false;
+        }
+        else if( entry != ENTRY_DELETED && key == entry->getKey() )
+        {
+            delete this->data[index];
+            this->data[index] = ENTRY_DELETED;   
+            --this->quantity;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
